@@ -11,6 +11,9 @@
     <button id="authorize_button" style="display: none;">Authorize</button>
     <button id="signout_button" style="display: none;">Sign Out</button>
 
+    <!--Add label to display server connection status-->
+    <ul id="events"></ul>
+
     <pre id="content" style="white-space: pre-wrap;"></pre>
 
     <script type="text/javascript">
@@ -136,6 +139,23 @@
     <script async defer src="https://apis.google.com/js/api.js"
       onload="this.onload=function(){};handleClientLoad()"
       onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const $events = document.getElementById('events');
+
+        const newItem = (content) => {
+          const item = document.createElement('li');
+          item.innerText = content;
+          return item;
+        };
+
+        const socket = io();
+
+        socket.on('connect', () => {
+          $events.appendChild(newItem('connect'));
+        });
     </script>
   </body>
 </html>
