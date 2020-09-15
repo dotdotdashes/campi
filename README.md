@@ -1,4 +1,4 @@
-# gcaldemo
+# Google Calendar API Demo 📅
 
 ## Set Up
 Get the server up by running the following command within the directory.
