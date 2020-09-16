@@ -136,7 +136,7 @@
             'userId': profile.getId(),
             'userName': profile.getName(),
             'email': profile.getEmail(),
-            // 'calendar': response.result.items,
+            'calendar': response.result.items,
             'isReadyToCall': false,
           });
 
@@ -319,27 +319,27 @@
           appendPre('users', 'User: ' + userData.email + " is ready? " + userData.isReadyToCall);
         });
 
-        // replacePre('calendars', 'Calendars: ');
-        // allUserData.forEach(userData => {
-        //   var events = userData.calendar;
+        replacePre('calendars', 'Calendars: ');
+        allUserData.forEach(userData => {
+          var events = userData.calendar;
 
-        //   appendPre('calendars', 'Upcoming events for userid:' + userData.userId);
+          appendPre('calendars', 'Upcoming events for userid:' + userData.userId);
 
-        //   if (events.length > 0) {
-        //     for (i = 0; i < events.length; i++) {
-        //       var event = events[i];
-        //       var when = event.start.dateTime;
-        //       if (!when) {
-        //         when = event.start.date;
-        //       }
-        //       appendPre('calendars', event.summary + ' (' + when + ')')
-        //     }
-        //   } else {
-        //     appendPre('calendars', 'No upcoming events found.');
-        //   }
+          if (events.length > 0) {
+            for (i = 0; i < events.length; i++) {
+              var event = events[i];
+              var when = event.start.dateTime;
+              if (!when) {
+                when = event.start.date;
+              }
+              appendPre('calendars', event.summary + ' (' + when + ')')
+            }
+          } else {
+            appendPre('calendars', 'No upcoming events found.');
+          }
           
-        //   appendPre('calendars', '\n');
-        // });
+          appendPre('calendars', '\n');
+        });
       }
 
     </script>
