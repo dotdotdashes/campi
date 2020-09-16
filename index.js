@@ -7,10 +7,22 @@ const httpServer = require('http').createServer((req, res) => {
   res.end(content);
 });
 
+// Documentation: https://socket.io/docs/
 const io = require('socket.io')(httpServer);
 
 io.on('connect', socket => {
   console.log('connect');
+
+  // Notify all other connected clients that a new user joined.
+  socket.on('newUserJoined', data => {
+      socket.broadcast.emit('newUserJoined', data);
+
+      // Notify the new user of an existing user that wants to greet it.
+      socket.on('greetNewUser', data => {
+          socket.emit('greetNewUser', data);
+      }); 
+  });
+ 
 });
 
 httpServer.listen(3000, () => {
