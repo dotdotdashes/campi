@@ -13,7 +13,7 @@
     <button id="signout_button" style="display: none;">Sign Out</button>
 
     <!--Add label to display server connection status-->
-    <ul id="events"></ul>
+    <ul id="server-connection"></ul>
 
     <pre id="content" style="white-space: pre-wrap;"></pre>
     <pre id="users" style="white-space: pre-wrap;"></pre>
@@ -29,7 +29,7 @@
     <!--Documentation: https://socket.io/docs/-->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const $events = document.getElementById('events');
+        const $serverConnection = document.getElementById('server-connection');
 
         const newItem = (content) => {
           const item = document.createElement('li');
@@ -41,17 +41,22 @@
 
         // Show server connection status on label.
         socket.on('connect', () => {
-          $events.appendChild(newItem('connect'));
+          $serverConnection.appendChild(newItem('connect'));
         });
 
-        // Greeted by another user with data to update current new user.
+        // Update current new user with data from existing user.
         socket.on('greetNewUser', (userData) => {
-          updateNewUser(userData);
+          updateAllUserData(userData, /*isNewEntry=*/true);
         });
 
         // Notified of a new user joining to greet.
         socket.on('newUserJoined', (newUserData) => {
           greetNewUser(newUserData);
+        });
+
+        // Update current user on any changes made by another existing user.
+        socket.on('updateUser', (userData) => {
+          updateAllUserData(userData, /*isNewEntry=*/false);
         });
     </script>
 
@@ -102,11 +107,116 @@
       }
 
       /**
+      * Sets up the user data of the new user upon signing in.
+      * 
+      * Documentation: 
+      * https://developers.google.com/identity/sign-in/web/reference#googleusergetid
+      */
+      function initMyUserData() {
+        if (localStorage.getItem('myUserData') != null) return;
+
+        const googleUser = gapi.auth2.getAuthInstance().currentUser.get();
+        const profile = googleUser.getBasicProfile();
+        
+        gapi.client.calendar.events.list({
+          'calendarId': 'primary',
+          'timeMin': (new Date()).toISOString(),
+          'showDeleted': false,
+          'singleEvents': true,
+          'maxResults': 10,
+          'orderBy': 'startTime'
+        }).then(function(response) {
+          var myUserData = JSON.stringify({
+            'userId': profile.getId(),
+            'userName': profile.getName(),
+            'email': profile.getEmail(),
+            'calendar': response.result.items,
+          });
+
+          localStorage.setItem('myUserData', myUserData);
+          updateAllUserData(myUserData, /*isNewEntry=*/true);
+
+          // broadcast to other users that a new user joined
+          socket.emit('newUserJoined', localStorage.getItem('myUserData'));
+        });
+      }
+
+      /**
+       * Updates an existing user with modified data.
+       * 
+       * @param {string} userData to update.
+       */
+      function updateAllUserData(userData, isNewEntry) {
+        if (userData == null) return;
+        userData = JSON.parse(userData);
+
+        var allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
+
+        // Find the existing user to update.
+        var index = allUserData.findIndex(x => x.userId == userData.userId);
+
+        // Check if the user data already exists in the array.
+        if (index === -1) {
+          if (isNewEntry) {
+            allUserData.push(userData);
+            localStorage.setItem('allUserData', JSON.stringify(allUserData));
+          } else {
+            return;
+          }
+        }
+
+        allUserData[index] = userData;
+        localStorage.setItem('allUserData', JSON.stringify(allUserData));
+
+        updateView();
+      }
+
+      /**
+       * Update my user data with new user's data.
+       * Then emit my user data to the new user.
+       * 
+       * @param {string} newUserData from new user to update with.
+       */
+      function greetNewUser(newUserData) {
+        if (newUserData == localStorage.getItem('myUserData')) return;
+
+        updateAllUserData(newUserData, /*isNewEntry=*/true);
+        socket.emit('greetNewUser', localStorage.getItem('myUserData'));
+      }
+
+      /**
+      * Update my user data (as a new user) with an existing user's data.
+      * This function is called once for each user that greets me, as a
+      * new user.
+      * 
+      * @param {string} existingUserData from an existing user to update with.
+      */
+      function updateNewUserData(existingUserData) {
+        if (existingUserData == localStorage.getItem('myUserData')) return;
+
+        updateAllUserData(existingUserData, /*isNewEntry=*/true);
+      }
+
+      /**
+       * Update my user data and emit these changes to all other users.
+       * 
+       * @param {string} myUpdatedUserData to update with.
+       */
+      function updateMyUserData(myUpdatedUserData) {
+        if (myUpdatedUserData == localStorage.getItem('myUserData')) return;
+
+        localStorage.setItem('myUserData', myUpdatedUserData);
+        updateAllUserData(myUpdatedUserData, /*isNewEntry=*/false);
+
+        socket.emit('updateUsers', localStorage.getItem('myUserData'));
+      }
+
+      /**
        *  Called when the signed in status changes, to update the UI
        *  appropriately. After a sign-in, the API is called.
        *  Notifies all other clients of a new user sign in.
        */
-      function updateSigninStatus(isSignedIn) {
+       function updateSigninStatus(isSignedIn) {
         if (isSignedIn) {
           authorizeButton.style.display = 'none';
           signoutButton.style.display = 'block';
@@ -130,14 +240,13 @@
       function handleSignoutClick(event) {
         gapi.auth2.getAuthInstance().signOut();
       }
-
       /**
-       * Append a pre element to the body containing the given message
-       * as its text node. Used to display the results of the API call.
-       *
-       * @param {string} id of the pre to append
-       * @param {string} message Text to be placed in pre element.
-       */
+      * Append a pre element to the body containing the given message
+      * as its text node. Used to display the results of the API call.
+      *
+      * @param {string} id of the pre to append
+      * @param {string} message Text to be placed in pre element.
+      */
       function appendPre(id, message) {
         var pre = document.getElementById(id);
         var textContent = document.createTextNode(message + '\n');
@@ -145,131 +254,15 @@
       }
 
       /**
-       * Replace a pre element to the body containing the given message
-       * as its text node. Used to display the results of the API call.
-       *
-       * @param {string} id of the pre to replace
-       * @param {string} message Text to be placed in pre element.
-       */
-       function replacePre(id, message) {
+      * Replace a pre element to the body containing the given message
+      * as its text node. Used to display the results of the API call.
+      *
+      * @param {string} id of the pre to replace
+      * @param {string} message Text to be placed in pre element.
+      */
+      function replacePre(id, message) {
         document.getElementById(id).innerHTML = "";
         appendPre(id, message);
-      }
-
-      /**
-       * Update my user data.
-       * 
-       * @param {string} myUserData to update with.
-       */
-      function updateMyUserData(myUserData) {
-        localStorage.setItem('myUserData', myUserData);
-        updateAllUserData(myUserData);
-      }
-
-      /**
-       * Adds user data to the collective user data array for the current user.
-       * 
-       * @param {string} userData to add.
-       */
-      function addToAllUserData(userData) {
-        if (userData == null) return;
-
-        var allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
-
-        // Check if the user data already exists in the array.
-        var index = allUserData.findIndex(x => x.userId == userData.userId);
-        if (index === -1) {
-          allUserData.push(JSON.parse(userData));
-          localStorage.setItem('allUserData', JSON.stringify(allUserData));
-        }
-
-        updateView();
-      }
-
-      /**
-       * Updates an existing user with modified data
-       * 
-       * @param {string} userData to update.
-       */
-      function updateAllUserData(userData) {
-        if (userData == null) return;
-        userData = JSON.parse(userData);
-
-        var allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
-
-        // Find the existing user to update.
-        var index = allUserData.findIndex(x => x.userId == userData.userId);
-        if (index === -1) return;
-        allUserData[index] = userData;
-        localStorage.setItem('allUserData', JSON.stringify(allUserData));
-
-        updateView();
-      }
-
-      /**
-       * Sets up the user data of the new user upon signing in.
-       * 
-       * Documentation: 
-       * https://developers.google.com/identity/sign-in/web/reference#googleusergetid
-       */
-      function initMyUserData() {
-        if (localStorage.getItem('myUserData') != null) return;
-
-        const googleUser = gapi.auth2.getAuthInstance().currentUser.get();
-        const profile = googleUser.getBasicProfile();
-        
-        gapi.client.calendar.events.list({
-          'calendarId': 'primary',
-          'timeMin': (new Date()).toISOString(),
-          'showDeleted': false,
-          'singleEvents': true,
-          'maxResults': 10,
-          'orderBy': 'startTime'
-        }).then(function(response) {
-          var myUserData = JSON.stringify({
-            'userId': profile.getId(),
-            'userName': profile.getName(),
-            'email': profile.getEmail(),
-            'calendar': response.result.items,
-          });
-
-          localStorage.setItem('myUserData', myUserData);
-          addToAllUserData(myUserData); // add to the list of all users
-          
-          newUserJoined(); // broadcast to other clients that a new user joined
-        });
-      }
-
-      /**
-       * Emits new user's data to update all other clients' data.
-       */
-      function newUserJoined() {
-        socket.emit('newUserJoined', localStorage.getItem('myUserData'));
-      }
-
-      /**
-       * Update the new user's data with another client's data.
-       * This function is called once for each client that greets the new user.
-       * 
-       * @param {string} userData from another user to update new user's data.
-       */
-      function updateNewUser(userData) {
-        if (userData == localStorage.getItem('myUserData')) return;
-
-        addToAllUserData(userData);
-      }
-
-      /**
-       * Update data with new user's data.
-       * Then emit user data to the new user.
-       * 
-       * @param {string} newUserData from new user to update current user's data.
-       */
-      function greetNewUser(newUserData) {
-        if (newUserData == localStorage.getItem('myUserData')) return;
-
-        addToAllUserData(newUserData);
-        socket.emit('greetNewUser', localStorage.getItem('myUserData'));
       }
 
       /**
