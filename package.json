@@ -1,0 +1,23 @@
+{
+  "name": "gcaldemo",
+  "version": "1.0.0",
+  "description": "A demo for using the Google Calendar API in real time with multiple users.",
+  "main": "index.js",
+  "dependencies": {
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotdotdashes/gcaldemo.git"
+  },
+  "author": "Dot Dot Dashes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dotdotdashes/gcaldemo/issues"
+  },
+  "homepage": "https://github.com/dotdotdashes/gcaldemo#readme"
+}
