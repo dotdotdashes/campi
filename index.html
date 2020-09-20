@@ -21,6 +21,7 @@
     <pre id="content" style="white-space: pre-wrap;"></pre>
     <pre id="users" style="white-space: pre-wrap;"></pre>
     <pre id="emails" style="white-space: pre-wrap;"></pre>
+    <pre id="signed-out" style="white-space: pre-wrap;"></pre>
     <pre id="calendars" style="white-space: pre-wrap;"></pre>
     <pre id="availability" style="white-space: pre-wrap;"></pre>
 
@@ -120,10 +121,12 @@
       * https://developers.google.com/identity/sign-in/web/reference#googleusergetid
       */
       function initMyUserData() {
-        if (localStorage.getItem('myUserData') != null) return;
+        // if (localStorage.getItem('myUserData') != null) return;
 
-        const googleUser = gapi.auth2.getAuthInstance().currentUser.get();
+        const googleAuth = gapi.auth2.getAuthInstance();
+        const googleUser = googleAuth.currentUser.get();
         const profile = googleUser.getBasicProfile();
+        const isSignedIn = googleAuth.isSignedIn.get();
         
         gapi.client.calendar.events.list({
           'calendarId': 'primary',
@@ -139,6 +142,7 @@
             'email': profile.getEmail(),
             'calendar': response.result.items,
             'isReadyToCall': false,
+            'isSignedIn': googleAuth.isSignedIn.get(),
           });
 
           localStorage.setItem('myUserData', myUserData);
@@ -223,6 +227,7 @@
        *  Called when the signed in status changes, to update the UI
        *  appropriately. After a sign-in, the API is called.
        *  Notifies all other clients of a new user sign in.
+       *  Updates sign-in field in Userdata and propagates to other users.
        */
        function updateSigninStatus(isSignedIn) {
         if (isSignedIn) {
@@ -233,6 +238,14 @@
           authorizeButton.style.display = 'block';
           signoutButton.style.display = 'none';
         }
+
+        // Get user json file
+        var myUserData = JSON.parse(localStorage.getItem('myUserData'));
+        if (myUserData == null) return;
+
+        // update isSignedIn field
+        myUserData.isSignedIn = isSignedIn;
+        updateMyUserData(JSON.stringify(myUserData));
       }
 
       /**
@@ -258,6 +271,7 @@
        */
       function handleSignoutClick(event) {
         gapi.auth2.getAuthInstance().signOut();
+
       }
 
       /**
@@ -319,6 +333,13 @@
         allUserData.forEach(userData => {
           appendPre('users', 'User: ' + userData.email + " is ready? " + userData.isReadyToCall);
         });
+
+        replacePre('signed-out', 'Sign In Status: ');
+        allUserData.forEach(userData => {
+          // appendPre("hi");
+          appendPre('signed-out', 'Signed Out: ' + userData.email + " is signed in? " + userData.isSignedIn);
+        });
+
 
         replacePre('calendars', 'Calendars: ');
         allUserData.forEach(userData => {
