@@ -7,7 +7,7 @@ npm install
 
 Start the server.
 ```
-node index.js
+npm start
 ```
 Then go to http://localhost:3000/ on your browser to view the demo.
 

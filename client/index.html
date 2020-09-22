@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--Documentation: https://developers.google.com/calendar/quickstart/js-->
+    <title>Google Calendar API Quickstart</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="main.css">
+  </head>
+  <body>
+    <p>Google Calendar API Quickstart</p>
+
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorize_button" style="display: none;">Authorize</button>
+    <button id="signout_button" style="display: none;">Sign Out</button>
+
+    <!--Add buttons to toggle state-->
+    <button id="readyToCall_button" style="display: block;">Ready to Call</button>
+
+    <!--Add label to display server connection status-->
+    <ul id="server-connection"></ul> -->
+
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+    <pre id="users" style="white-space: pre-wrap;"></pre>
+    <pre id="emails" style="white-space: pre-wrap;"></pre>
+    <pre id="signed-out" style="white-space: pre-wrap;"></pre>
+    <pre id="calendars" style="white-space: pre-wrap;"></pre>
+    <pre id="availability" style="white-space: pre-wrap;"></pre>
+
+
+    <main>
+      <section id="sky-bg"></section>
+      <section id="lake-bg">
+        <div id="lake"></div>
+      </section>
+      <!-- TODO: template this -->
+      <section id="campers-bg">
+        <div id="campers">
+          <div class="camp">
+            <div class="item tent"></div>
+            <div class="item camper"></div>
+            <div class="item schedule"></div>
+            <div class="item fire"></div>
+          </div>
+          <div class="camp">
+            <div class="item tent"></div>
+            <div class="item camper"></div>
+            <div class="item schedule"></div>
+            <div class="item fire"></div>
+          </div>
+          <div class="camp">
+            <div class="item tent"></div>
+            <div class="item camper"></div>
+            <div class="item schedule"></div>
+            <div class="item fire"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!--Use socket.io for real time, bidirectional and event-based communication-->
+    <!--Documentation: https://socket.io/docs/-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="socket.js"> </script>
+    <script src="script.js" ></script>
+    <script src="https://unpkg.com/mustache@latest"></script>
+
+    <!--Add async to this tag to follow original quickstart code-->
+    <script defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+  </body>
+</html>
