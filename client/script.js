@@ -1,6 +1,5 @@
 // Client ID and API key from the Developer Console
 var CLIENT_ID = '153952219009-ellvdqq4cj7esdlm4a7qv6uo8phogkbs.apps.googleusercontent.com';
-var API_KEY = 'AIzaSyBYvGEX8vKS6jwij8l11EklPxYdaff1KOw';
 
 // Array of API discovery doc URLs for APIs used by the quickstart
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
@@ -27,7 +26,6 @@ function handleClientLoad() {
  */
 function initClient() {
   gapi.client.init({
-    apiKey: API_KEY,
     clientId: CLIENT_ID,
     discoveryDocs: DISCOVERY_DOCS,
     scope: SCOPES
@@ -213,8 +211,8 @@ function handleAuthClick(event) {
  *  Sign out the user upon button click.
  */
 function handleSignoutClick(event) {
+  localStorage.clear();
   gapi.auth2.getAuthInstance().signOut();
-
 }
 
 /**
@@ -258,6 +256,27 @@ function replacePre(id, message) {
 /**
  * Displays the information of each user.
  * Function called on data update to re-render.
+ */
+
+ /*
+ function calcRules(userData) {
+   const hasEvent = hasEvent(userData);
+   return {
+      fireOn:     userData.active,
+      tentOpen:   userData.status && hasEvent
+      isPresent:  userData.active && (userData.location == 0 || !hasEvent)
+      atLake:     userData.active && userData.location == 1
+   }
+ }
+
+  for (user in users) {
+    var userRules = calcRules(user.data);
+    updateUser(user.id, userRules)
+  }
+
+  updateUser(id, userRules) {
+    ...
+  }
  */
 function updateView() {
   const allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
