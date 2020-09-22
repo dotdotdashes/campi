@@ -259,6 +259,8 @@ function replacePre(id, message) {
  */
 
  /*
+TODO: example idea (separate data and logic from rendering), not done:
+
  function calcRules(userData) {
    const hasEvent = hasEvent(userData);
    return {
