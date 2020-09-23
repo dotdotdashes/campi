@@ -2,7 +2,7 @@
   "name": "gcaldemo",
   "version": "1.0.0",
   "description": "A demo for using the Google Calendar API in real time with multiple users.",
-  "main": "index.js",
+  "main": "server.js",
   "dependencies": {
     "node-static": "^0.7.11",
     "socket.io": "^2.3.0"
