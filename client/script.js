@@ -12,12 +12,15 @@ var authorizeButton = document.getElementById('authorize_button');
 var signoutButton = document.getElementById('signout_button');
 var readyToCallButton = document.getElementById('readyToCall_button');
 
+var DEBUG_MODE = false; // toggle for debug logs
+
 /**
  *  On load, called to load the auth2 library and API client library.
  */
 function handleClientLoad() {
   gapi.load('client:auth2', initClient);
-  updateView();
+  renderView();
+  if (DEBUG_MODE == true) updateDebugLogs();
 }
 
 /**
@@ -78,11 +81,31 @@ function initMyUserData() {
     'orderBy': 'startTime'
   }).then(function(response) {
     var myUserData = JSON.stringify({
-      'userId': profile.getId(),
-      'userName': profile.getName(),
-      'email': profile.getEmail(),
+      'id': profile.getId(),
+      'user': profile.getName(),
+      'status': {
+        'text': "Eating lunch",
+        'due': (new Date()).toISOString(),
+		    'emoji': '\01F354',
+      },
+      'message': {
+        'text': 'Today I am doing nothing',
+        'due': (new Date()).toISOString(),
+        'emoji': '\01F354',
+      },
+      'requested': [
+        {
+          'user': 'Gracie',
+          'request': 0,
+          'text': "Let's talk today about the design.",
+        },
+      ],
+      'active': false,
+      'last_updated': '2 hours ago',
+      'location': 0,
+      'state': 0,
+      'time_zone': "",
       'calendar': parseCalData(response.result.items),
-      'isReadyToCall': false,
       'isSignedIn': googleAuth.isSignedIn.get(),
     });
 
@@ -106,7 +129,7 @@ function updateAllUserData(userData, isNewEntry) {
   var allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
 
   // Find the existing user to update.
-  var index = allUserData.findIndex(x => x.userId == userData.userId);
+  var index = allUserData.findIndex(x => x.id == userData.id);
 
   // Check if the user data already exists in the array.
   if (index === -1) {
@@ -121,7 +144,8 @@ function updateAllUserData(userData, isNewEntry) {
   allUserData[index] = userData;
   localStorage.setItem('allUserData', JSON.stringify(allUserData));
   
-  updateView();
+  renderView();
+  if (DEBUG_MODE) updateDebugLogs();
 }
 
 /**
@@ -190,17 +214,6 @@ function updateMyUserData(myUpdatedUserData) {
 }
 
 /**
- * Called when the ready state changes to update the UI
- */
-function updateIsReadyToCallState(isReadyToCall) {
-  if (isReadyToCall) {
-    readyToCallButton.innerText = 'Not Ready To Call';
-  } else {
-    readyToCallButton.innerText = 'Ready To Call';
-  }
-}
-
-/**
  *  Sign in the user upon button click.
  */
 function handleAuthClick(event) {
@@ -216,21 +229,74 @@ function handleSignoutClick(event) {
 }
 
 /**
- * Toggle the ready to call state.
+ * Determines if a user has an event currently.
+ * 
+ * @param {json} userData is the user's data from local storage
  */
-function handleReadyToCallClick(event) {
-  var myUserData = JSON.parse(localStorage.getItem('myUserData'));
-  if (myUserData == null) return;
+function hasEvent(userData) {
+  var events = userData.calendar;
+  var cur = (new Date()).toISOString();
 
-  const isReadyToCall = !myUserData.isReadyToCall; // Toggle the state
-  myUserData.isReadyToCall = isReadyToCall;
-  updateIsReadyToCallState(isReadyToCall);
-  updateMyUserData(JSON.stringify(myUserData));
+  if (events.length > 0) {
+    for (i = 0; i < events.length; i++) {
+      var event = events[i];
+      var start = new Date(event.start.dateTime);
+      if (!start) {
+        start = new Date(event.start.date);
+      }
+      var end = new Date(event.end.dateTime);
+      if (!end) {
+        end = new Date(event.end.date);
+      }
+      if(cur >= start && cur <= end ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Calculates user state logic based on user data.
+ * 
+ * @param {json} userData is the user's data from local storage
+ */
+function calcRules(userData) {
+  const isBusy = hasEvent(userData);
+  return {
+    fireOn:     userData.active,
+    tentOpen:   userData.status && isBusy,
+    isPresent:  userData.active && (userData.location == 0 || !isBusy),
+    atLake:     userData.active && userData.location == 1,
+  }
+}
+
+/**
+ * Renders and updates the graphics.
+ */
+function renderView() {
+  const allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
+  if (allUserData == []) return;
+  allUserData.forEach(userData => {
+    var userRules = calcRules(userData);
+    renderUser(userData.id, userRules);
+  });
+}
+
+/**
+ * Uses the calculated user rules to render and update each user's graphics.
+ * 
+ * @param {string} id of the user to re-render
+ * @param {map} userRules of the logical states of the user
+ */
+function renderUser(id, userRules) {
+  // TODO: Render the user campsite.
 }
 
 /**
 * Append a pre element to the body containing the given message
-* as its text node. Used to display the results of the API call.
+* as its text node. Used to display debug logs.
 *
 * @param {string} id of the pre to append
 * @param {string} message Text to be placed in pre element.
@@ -243,7 +309,7 @@ function appendPre(id, message) {
 
 /**
 * Replace a pre element to the body containing the given message
-* as its text node. Used to display the results of the API call.
+* as its text node. Used to display debug logs.
 *
 * @param {string} id of the pre to replace
 * @param {string} message Text to be placed in pre element.
@@ -254,62 +320,28 @@ function replacePre(id, message) {
 }
 
 /**
- * Displays the information of each user.
- * Function called on data update to re-render.
+ * Displays the information of each user for debugging purposes.
+ * Function called on data update to re-render the logs.
  */
-
- /*
-TODO: example idea (separate data and logic from rendering), not done:
-
- function calcRules(userData) {
-   const hasEvent = hasEvent(userData);
-   return {
-      fireOn:     userData.active,
-      tentOpen:   userData.status && hasEvent
-      isPresent:  userData.active && (userData.location == 0 || !hasEvent)
-      atLake:     userData.active && userData.location == 1
-   }
- }
-
-  for (user in users) {
-    var userRules = calcRules(user.data);
-    updateUser(user.id, userRules)
-  }
-
-  updateUser(id, userRules) {
-    ...
-  }
- */
-function updateView() {
+function updateDebugLogs() {
   const allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
 
   replacePre('users', 'List of users: ');
   allUserData.forEach(userData => {
-    appendPre('users', 'User: ' + userData.userId);
-  });
-
-  replacePre('emails', 'List of emails: ');
-  allUserData.forEach(userData => {
-    appendPre('emails', 'Email: ' + userData.email);
-  });
-
-  replacePre('users', 'Availability: ');
-  allUserData.forEach(userData => {
-    appendPre('users', 'User: ' + userData.email + " is ready? " + userData.isReadyToCall);
+    appendPre('users', 'User: ' + userData.name + 'with id: ' + userData.id);
   });
 
   replacePre('signed-out', 'Sign In Status: ');
   allUserData.forEach(userData => {
     // appendPre("hi");
-    appendPre('signed-out', 'Signed Out: ' + userData.email + " is signed in? " + userData.isSignedIn);
+    appendPre('signed-out', 'Signed Out: ' + userData.name + 'with id: ' + userData.id + " is signed in? " + userData.isSignedIn);
   });
-
 
   replacePre('calendars', 'Calendars: ');
   allUserData.forEach(userData => {
     var events = userData.calendar;
 
-    appendPre('calendars', 'Upcoming events for userid:' + userData.userId);
+    appendPre('calendars', 'Upcoming events for id:' + userData.id);
 
     if (events.length > 0) {
       for (i = 0; i < events.length; i++) {
