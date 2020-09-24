@@ -12,15 +12,12 @@ var authorizeButton = document.getElementById('authorize_button');
 var signoutButton = document.getElementById('signout_button');
 var readyToCallButton = document.getElementById('readyToCall_button');
 
-var DEBUG_MODE = false; // toggle for debug logs
-
 /**
  *  On load, called to load the auth2 library and API client library.
  */
 function handleClientLoad() {
   gapi.load('client:auth2', initClient);
   renderView();
-  if (DEBUG_MODE == true) updateDebugLogs();
 }
 
 /**
@@ -40,7 +37,6 @@ function initClient() {
     updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
     authorizeButton.onclick = handleAuthClick;
     signoutButton.onclick = handleSignoutClick;
-    readyToCallButton.onclick = handleReadyToCallClick;
   }, function(error) {
     appendPre('content', JSON.stringify(error, null, 2));
   });
@@ -145,7 +141,6 @@ function updateAllUserData(userData, isNewEntry) {
   localStorage.setItem('allUserData', JSON.stringify(allUserData));
   
   renderView();
-  if (DEBUG_MODE) updateDebugLogs();
 }
 
 /**
@@ -277,11 +272,37 @@ function calcRules(userData) {
  */
 function renderView() {
   const allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
+  var template = document.getElementById('template').innerHTML;
+  var campers = [];
+
   if (allUserData == []) return;
   allUserData.forEach(userData => {
     var userRules = calcRules(userData);
-    renderUser(userData.id, userRules);
+    var events = userData.calendar;
+    var schedule = [];
+
+    for (i = 0; i < events.length; i++) {
+      var event = events[i];
+      var when = event.start.dateTime;
+      if (!when) {
+        when = event.start.date;
+      }
+      schedule.push({'event': event.title + ' (' + when + ')'});
+    }
+
+    campers.push({
+      'camper': userData.user,
+      'fire': userRules.fireOn ? 'Fire' : 'No Fire',
+      'tent': userRules.tentOpen ? 'Open Tent' : 'Closed Tent',
+      'schedule': schedule,
+    });
   });
+  
+  var data = {
+    'campers': campers,
+  }
+  var rendered = Mustache.render(template,data);
+  document.getElementById('campers').innerHTML = rendered;
 }
 
 /**
@@ -291,71 +312,5 @@ function renderView() {
  * @param {map} userRules of the logical states of the user
  */
 function renderUser(id, userRules) {
-  // TODO: Render the user campsite.
-}
-
-/**
-* Append a pre element to the body containing the given message
-* as its text node. Used to display debug logs.
-*
-* @param {string} id of the pre to append
-* @param {string} message Text to be placed in pre element.
-*/
-function appendPre(id, message) {
-  var pre = document.getElementById(id);
-  var textContent = document.createTextNode(message + '\n');
-  pre.appendChild(textContent);
-}
-
-/**
-* Replace a pre element to the body containing the given message
-* as its text node. Used to display debug logs.
-*
-* @param {string} id of the pre to replace
-* @param {string} message Text to be placed in pre element.
-*/
-function replacePre(id, message) {
-  document.getElementById(id).innerHTML = "";
-  appendPre(id, message);
-}
-
-/**
- * Displays the information of each user for debugging purposes.
- * Function called on data update to re-render the logs.
- */
-function updateDebugLogs() {
-  const allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
-
-  replacePre('users', 'List of users: ');
-  allUserData.forEach(userData => {
-    appendPre('users', 'User: ' + userData.name + 'with id: ' + userData.id);
-  });
-
-  replacePre('signed-out', 'Sign In Status: ');
-  allUserData.forEach(userData => {
-    // appendPre("hi");
-    appendPre('signed-out', 'Signed Out: ' + userData.name + 'with id: ' + userData.id + " is signed in? " + userData.isSignedIn);
-  });
-
-  replacePre('calendars', 'Calendars: ');
-  allUserData.forEach(userData => {
-    var events = userData.calendar;
-
-    appendPre('calendars', 'Upcoming events for id:' + userData.id);
-
-    if (events.length > 0) {
-      for (i = 0; i < events.length; i++) {
-        var event = events[i];
-        var when = event.start.dateTime;
-        if (!when) {
-          when = event.start.date;
-        }
-        appendPre('calendars', event.title + ' (' + when + ')')
-      }
-    } else {
-      appendPre('calendars', 'No upcoming events found.');
-    }
-    
-    appendPre('calendars', '\n');
-  });
+  // TODO: render the user's campsite
 }

@@ -4,6 +4,7 @@
   "description": "A demo for using the Google Calendar API in real time with multiple users.",
   "main": "server.js",
   "dependencies": {
+    "mustache": "^4.0.1",
     "node-static": "^0.7.11",
     "socket.io": "^2.3.0"
   },

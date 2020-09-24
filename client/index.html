@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" href="main.css">
   </head>
-  <body>
+  <body onload="renderView()">
     <p>Google Calendar API Quickstart</p>
 
     <!--Add buttons to initiate auth sequence and sign out-->
@@ -14,7 +14,7 @@
     <button id="signout_button" style="display: none;">Sign Out</button>
 
     <!--Add label to display server connection status-->
-    <ul id="server-connection"></ul> -->
+    <ul id="server-connection"></ul>
 
     <pre id="content" style="white-space: pre-wrap;"></pre>
     <pre id="users" style="white-space: pre-wrap;"></pre>
@@ -23,34 +23,29 @@
     <pre id="calendars" style="white-space: pre-wrap;"></pre>
     <pre id="availability" style="white-space: pre-wrap;"></pre>
 
+    <script id="template" type="x-tmpl-mustache">
+      {{#campers}}
+        <div class="camp">
+          <div class="item tent">{{tent}}</div>
+          <div class="item camper">{{camper}}</div>
+          <div class="item schedule">
+            {{#schedule}}
+              <div class="item event">{{event}}</div>
+            {{/schedule}}
+          </div>
+          <div class="item fire">{{fire}}</div>
+        </div>
+      {{/campers}}  
+    </script>
 
     <main>
       <section id="sky-bg"></section>
       <section id="lake-bg">
         <div id="lake"></div>
       </section>
-      <!-- TODO: template this -->
+    
       <section id="campers-bg">
-        <div id="campers">
-          <div class="camp">
-            <div class="item tent"></div>
-            <div class="item camper"></div>
-            <div class="item schedule"></div>
-            <div class="item fire"></div>
-          </div>
-          <div class="camp">
-            <div class="item tent"></div>
-            <div class="item camper"></div>
-            <div class="item schedule"></div>
-            <div class="item fire"></div>
-          </div>
-          <div class="camp">
-            <div class="item tent"></div>
-            <div class="item camper"></div>
-            <div class="item schedule"></div>
-            <div class="item fire"></div>
-          </div>
-        </div>
+        <div id="campers"></div>
       </section>
     </main>
 
@@ -59,8 +54,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="socket.js"> </script>
     <script src="script.js" ></script>
+    <!--Use mustache.js for templating: https://github.com/janl/mustache.js/-->
     <script src="https://unpkg.com/mustache@latest"></script>
 
+    <!--Google Calendar API-->
     <!--Add async to this tag to follow original quickstart code-->
     <script defer src="https://apis.google.com/js/api.js"
       onload="this.onload=function(){};handleClientLoad()"
