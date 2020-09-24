@@ -28,12 +28,12 @@
         <div class="camp">
           <div class="item tent">{{tent}}</div>
           <div class="item camper">{{camper}}</div>
+          <div class="item fire">{{fire}}</div>
           <div class="item schedule">
             {{#schedule}}
               <div class="item event">{{event}}</div>
             {{/schedule}}
           </div>
-          <div class="item fire">{{fire}}</div>
         </div>
       {{/campers}}  
     </script>
@@ -54,10 +54,9 @@
     <script src="/socket.io/socket.io.js"></script>
     <!--Use mustache.js for templating: https://github.com/janl/mustache.js/-->
     <script src="https://unpkg.com/mustache@latest"></script>
-    
+
     <script src="socket.js"> </script>
     <script src="script.js" ></script>
-    
 
     <!--Google Calendar API-->
     <!--Add async to this tag to follow original quickstart code-->

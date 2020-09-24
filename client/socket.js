@@ -25,5 +25,6 @@ socket.on('newUserJoined', (newUserData) => {
 
 // Update current user on any changes made by another existing user.
 socket.on('updateUser', (userData) => {
+    console.log(userData);
     updateAllUserData(userData, /*isNewEntry=*/false);
 });

@@ -96,7 +96,7 @@ function initMyUserData() {
           'text': "Let's talk today about the design.",
         },
       ],
-      'active': false,
+      'active': true,
       'last_updated': '2 hours ago',
       'location': 0,
       'state': 0,
@@ -107,7 +107,7 @@ function initMyUserData() {
 
     localStorage.setItem('myUserData', myUserData);
     updateAllUserData(myUserData, /*isNewEntry=*/true);
-
+    
     // broadcast to other users that a new user joined
     socket.emit('newUserJoined', localStorage.getItem('myUserData'));
   });
@@ -194,18 +194,12 @@ function updateMyUserData(myUpdatedUserData) {
     authorizeButton.style.display = 'none';
     signoutButton.style.display = 'block';
     initMyUserData(); // initialize user data
-  } else {
-    authorizeButton.style.display = 'block';
-    signoutButton.style.display = 'none';
+    return;
   }
 
-  // Get user json file
-  var myUserData = JSON.parse(localStorage.getItem('myUserData'));
-  if (myUserData == null) return;
-
-  // update isSignedIn field
-  myUserData.isSignedIn = isSignedIn;
-  updateMyUserData(JSON.stringify(myUserData));
+  authorizeButton.style.display = 'block';
+  signoutButton.style.display = 'none';
+  localStorage.clear();
 }
 
 /**
@@ -219,7 +213,6 @@ function handleAuthClick(event) {
  *  Sign out the user upon button click.
  */
 function handleSignoutClick(event) {
-  localStorage.clear();
   gapi.auth2.getAuthInstance().signOut();
 }
 
@@ -277,6 +270,7 @@ function renderView() {
 
   if (allUserData == []) return;
   allUserData.forEach(userData => {
+    console.log(userData);
     var userRules = calcRules(userData);
     var events = userData.calendar;
     var schedule = [];
