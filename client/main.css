@@ -1,0 +1,56 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 200px 50%;
+}
+
+main section, main, .camp, .container, .item {
+    border: 1px solid red;
+}
+
+#sky-bg {
+    background: url("assets/sky.png") bottom/cover no-repeat;
+}
+
+#lake-bg {
+    background-color: #FDF0BD;
+    justify-content: center;
+    display: flex;
+}
+
+#lake {
+    height: 100%;
+    width: 100%;
+    max-width: 700px;
+    background: url("assets/lake.png") top/cover no-repeat;
+}
+
+#campers-bg {
+    background-color: #FDF0BD;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#campers {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.camp {
+    width: 300px;
+    height: 300px;
+    display: grid;
+    grid-template-areas:    "X X"
+                            "X X"
+}
