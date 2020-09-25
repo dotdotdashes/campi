@@ -26,9 +26,15 @@
     <script id="template" type="x-tmpl-mustache">
       {{#campers}}
         <div class="camp">
-          <div class="item tent">{{tent}}</div>
-          <div class="item camper">{{camper}}</div>
-          <div class="item fire">{{fire}}</div>
+          <div class="item tent">
+            <img src="assets/{{tent}}" />
+          </div>
+          <div class="item camper">
+            <img src="assets/{{camper}}" />
+          </div>
+          <div class="item fire">
+            <img src="assets/{{fire}}" />
+          </div>
           <div class="item schedule">
             {{#schedule}}
               <div class="item event">{{event}}</div>
@@ -41,7 +47,7 @@
     <main>
       <section id="sky-bg"></section>
       <section id="lake-bg">
-        <div id="lake"></div>
+        <div id="lake" onclick="goToLake()"></div>
       </section>
     
       <section id="campers-bg">

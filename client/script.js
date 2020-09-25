@@ -12,6 +12,8 @@ var authorizeButton = document.getElementById('authorize_button');
 var signoutButton = document.getElementById('signout_button');
 var readyToCallButton = document.getElementById('readyToCall_button');
 
+var myUserData;
+
 /**
  *  On load, called to load the auth2 library and API client library.
  */
@@ -76,7 +78,7 @@ function initMyUserData() {
     'maxResults': 10,
     'orderBy': 'startTime'
   }).then(function(response) {
-    var myUserData = JSON.stringify({
+    var _myUserData = JSON.stringify({
       'id': profile.getId(),
       'user': profile.getName(),
       'status': {
@@ -105,11 +107,12 @@ function initMyUserData() {
       'isSignedIn': googleAuth.isSignedIn.get(),
     });
 
-    localStorage.setItem('myUserData', myUserData);
-    updateAllUserData(myUserData, /*isNewEntry=*/true);
+    myUserData = _myUserData;
+    localStorage.setItem('myUserData', _myUserData);
+    updateAllUserData(_myUserData, /*isNewEntry=*/true);
     
     // broadcast to other users that a new user joined
-    socket.emit('newUserJoined', localStorage.getItem('myUserData'));
+    socket.emit('newUserJoined', myUserData);
   });
 }
 
@@ -150,10 +153,10 @@ function updateAllUserData(userData, isNewEntry) {
  * @param {string} newUserData from new user to update with.
  */
 function greetNewUser(newUserData) {
-  if (newUserData == localStorage.getItem('myUserData')) return;
+  if (newUserData == myUserData) return;
 
   updateAllUserData(newUserData, /*isNewEntry=*/true);
-  socket.emit('greetNewUser', localStorage.getItem('myUserData'));
+  socket.emit('greetNewUser', newUserData);
 }
 
 /**
@@ -164,7 +167,7 @@ function greetNewUser(newUserData) {
 * @param {string} existingUserData from an existing user to update with.
 */
 function updateNewUserData(existingUserData) {
-  if (existingUserData == localStorage.getItem('myUserData')) return;
+  if (existingUserData == myUserData) return;
 
   updateAllUserData(existingUserData, /*isNewEntry=*/true);
 }
@@ -174,13 +177,11 @@ function updateNewUserData(existingUserData) {
  * 
  * @param {string} myUpdatedUserData to update with.
  */
-function updateMyUserData(myUpdatedUserData) {
-  if (myUpdatedUserData == localStorage.getItem('myUserData')) return;
+function updateMyUserData() {
+  localStorage.setItem(myUserData);
+  updateAllUserData(myUserData, /*isNewEntry=*/false);
 
-  localStorage.setItem('myUserData', myUpdatedUserData);
-  updateAllUserData(myUpdatedUserData, /*isNewEntry=*/false);
-
-  socket.emit('updateAllUsers', localStorage.getItem('myUserData'));
+  socket.emit('updateAllUsers', myUserData);
 }
 
 /**
@@ -285,9 +286,9 @@ function renderView() {
     }
 
     campers.push({
-      'camper': userData.user,
-      'fire': userRules.fireOn ? 'Fire' : 'No Fire',
-      'tent': userRules.tentOpen ? 'Open Tent' : 'Closed Tent',
+      'camper': userData.user ? 'user_present.png' : 'user_absent.png',
+      'fire': userRules.fireOn ? 'fire_on.png' : 'fire_off.png',
+      'tent': userRules.tentOpen ? 'tent_open.png' : 'tent_closed.png',
       'schedule': schedule,
     });
   });
@@ -307,4 +308,10 @@ function renderView() {
  */
 function renderUser(id, userRules) {
   // TODO: render the user's campsite
+}
+
+function goToLake() {
+  if (myUserData.location == 1) return;
+  myUserData.location = 1;
+  updateMyUserData();
 }
