@@ -12,6 +12,7 @@ var authorizeButton = document.getElementById('authorize_button');
 var signoutButton = document.getElementById('signout_button');
 var readyToCallButton = document.getElementById('readyToCall_button');
 
+// Stores the state of the user, After making changes to myUserData, call updateMyUserData() to save to localStorage and propogate the changes to the other clients
 var myUserData;
 
 /**
