@@ -47,7 +47,7 @@ io.on('connect', socket => {
         }
         else {
           userData.active = false;
-          socket.broadcast.emit('updateUser', JSON.stringify(userData));
+          socket.broadcast.emit('userInactive', id);
           users.delete(id);
         }
       });

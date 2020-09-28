@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="main.css">
   </head>
   <body onload="renderView()">
-    <p>Google Calendar API Quickstart</p>
-
     <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize_button" style="display: none;">Authorize</button>
     <button id="signout_button" style="display: none;">Sign Out</button>
@@ -16,40 +14,43 @@
     <!--Add label to display server connection status-->
     <ul id="server-connection"></ul>
 
-    <pre id="content" style="white-space: pre-wrap;"></pre>
-    <pre id="users" style="white-space: pre-wrap;"></pre>
-    <pre id="emails" style="white-space: pre-wrap;"></pre>
-    <pre id="signed-out" style="white-space: pre-wrap;"></pre>
-    <pre id="calendars" style="white-space: pre-wrap;"></pre>
-    <pre id="availability" style="white-space: pre-wrap;"></pre>
-
     <script id="template" type="x-tmpl-mustache">
       <section id="sky-bg"></section>
 
       <section id="lake-bg">
+        <div class="campers">
+          {{#campers}}
+            <img src="assets/{{lake}}" />
+          {{/campers}} 
+        </div>
         <div id="lake" onclick="goToLake()"></div>
-        {{#campers}}
-          <img src="assets/{{lake}}" />
-        {{/campers}}  
       </section>
 
       <section id="campers-bg">
         <div id="campers">
           {{#campers}}
             <div class="camp">
-              <div class="item tent">
-                <img src="assets/{{tent}}" />
+              <div class="item">
+                <img class="flag" src="assets/flag.png" />
+                <select class="emoji-select" onchange="setEmoji(this)" {{^user}}disabled{{/user}}>
+                  {{#emojis}}
+                    <option value={{id}} {{#selected}}selected{{/selected}}>{{emoji}} - {{status}}</option>
+                  {{/emojis}}
+                </select>
+                <img class="tent" src="assets/{{tent}}" />
               </div>
-              <div class="item camper">
-                <img src="assets/{{camper}}" />
+              <div class="item">
+                <img class="camper" src="assets/{{camper}}" {{#user}}onclick="goToCamp()"{{/user}} />
               </div>
-              <div class="item fire">
-                <img src="assets/{{fire}}" />
+              <div class="item">
+                <img class="fire" src="assets/{{fire}}" />
               </div>
-              <div class="item schedule">
-                {{#schedule}}
-                  <div class="item event">{{event}}</div>
-                {{/schedule}}
+              <div class="item">
+                <div class="schedule">
+                  {{#schedule}}
+                    <div class="item event">{{event}}</div>
+                  {{/schedule}}
+                </div>
               </div>
             </div>
           {{/campers}}  

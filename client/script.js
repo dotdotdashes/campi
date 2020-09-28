@@ -15,6 +15,24 @@ var readyToCallButton = document.getElementById('readyToCall_button');
 // Stores the state of the user, After making changes to myUserData, call updateMyUserData() to save to localStorage and propogate the changes to the other clients
 var myUserData = {};
 
+const EMOJIS = [
+  {
+    id: 0,
+    emoji: '🎒',
+    status: "doing school"
+  },
+  {
+    id: 1,
+    emoji: '🍔 ',
+    status: "eating"
+  },
+  {
+    id: 2,
+    emoji: '💤',
+    status: "taking a break"
+  },
+];
+
 /**
  *  On load, called to load the auth2 library and API client library.
  */
@@ -82,16 +100,7 @@ function initMyUserData() {
     var _myUserData = {
       'id': profile.getId(),
       'user': profile.getName(),
-      'status': {
-        'text': "Eating lunch",
-        'due': (new Date()).toISOString(),
-		    'emoji': '\01F354',
-      },
-      'message': {
-        'text': 'Today I am doing nothing',
-        'due': (new Date()).toISOString(),
-        'emoji': '\01F354',
-      },
+      'status': 1,
       'requested': [
         {
           'user': 'Gracie',
@@ -148,6 +157,21 @@ function updateAllUserData(userData, isNewEntry) {
   renderView();
 }
 
+function makeUserInactive(userId) {
+  var allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
+
+  // Find the existing user to update.
+  var index = allUserData.findIndex(x => x.id == userId);
+
+  // Check if the user data already exists in the array.
+  if (index === -1) return;
+
+  allUserData[index].active = false;
+  localStorage.setItem('allUserData', JSON.stringify(allUserData));
+  
+  renderView();
+}
+
 /**
  * Update my user data with new user's data.
  * Then emit my user data to the new user.
@@ -183,7 +207,6 @@ function updateMyUserData() {
   var data = JSON.stringify(myUserData);
   localStorage.setItem('myUserData', data);
   updateAllUserData(data, /*isNewEntry=*/false);
-
   socket.emit('updateAllUsers', data);
 }
 
@@ -258,9 +281,10 @@ function calcRules(userData) {
   const isBusy = hasEvent(userData);
   return {
     fireOn:     userData.active,
-    tentOpen:   userData.status && isBusy,
+    tentOpen:   !(userData.status && isBusy),
     isPresent:  userData.active && userData.location == 0 && !isBusy,
     atLake:     userData.active && userData.location == 1,
+    isUser:     userData.user == myUserData.user
   }
 }
 
@@ -277,6 +301,7 @@ function renderView() {
     var userRules = calcRules(userData);
     var events = userData.calendar;
     var schedule = [];
+    var emojis = JSON.parse(JSON.stringify(EMOJIS));
 
     for (i = 0; i < events.length; i++) {
       var event = events[i];
@@ -287,35 +312,42 @@ function renderView() {
       schedule.push({'event': event.title + ' (' + when + ')'});
     }
 
+    emojis.forEach(emoji => {
+      emoji.selected = (emoji.id == userData.status)
+    });
+
     campers.push({
-      'camper': userRules.isPresent ? 'user_present.png' : 'user_absent.png',
+      'camper': userRules.isPresent ? 'user_present.png' : 'bunny.png',
       'fire': userRules.fireOn ? 'fire_on.png' : 'fire_off.png',
       'tent': userRules.tentOpen ? 'tent_open.png' : 'tent_closed.png',
       'schedule': schedule,
-      'lake': userRules.atLake ? 'user_present.png' : 'user_absent.png'
+      'lake': userRules.atLake ? 'user_present.png' : 'bunny.png',
+      'user': userRules.isUser,
+      'emojis': emojis
     });
   });
-  
-  var data = {
-    'campers': campers,
-  }
 
-  var rendered = Mustache.render(template, data);
+  var rendered = Mustache.render(template, { 'campers': campers });
   document.getElementById('main').innerHTML = rendered;
 }
 
-/**
- * Uses the calculated user rules to render and update each user's graphics.
- * 
- * @param {string} id of the user to re-render
- * @param {map} userRules of the logical states of the user
- */
-function renderUser(id, userRules) {
-  // TODO: render the user's campsite
-}
+
+// Interface Methods
 
 function goToLake() {
   if (myUserData.location == 1) return;
   myUserData.location = 1;
+  updateMyUserData();
+}
+
+function goToCamp() {
+  if (myUserData.location == 0) return;
+  myUserData.location = 0;
+  updateMyUserData();
+}
+
+function setEmoji(emoji) {
+  if (myUserData.status == emoji.value) return;
+  myUserData.status = parseInt(emoji.value);
   updateMyUserData();
 }

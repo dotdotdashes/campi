@@ -28,3 +28,7 @@ socket.on('updateUser', (userData) => {
     console.log(userData);
     updateAllUserData(userData, /*isNewEntry=*/false);
 });
+
+socket.on('userInactive', (id) => {
+    makeUserInactive(id);
+});
