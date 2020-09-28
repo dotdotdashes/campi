@@ -38,7 +38,6 @@ const EMOJIS = [
  */
 function handleClientLoad() {
   gapi.load('client:auth2', initClient);
-  renderView();
 }
 
 /**
@@ -88,7 +87,7 @@ function initMyUserData() {
   const googleUser = googleAuth.currentUser.get();
   const profile = googleUser.getBasicProfile();
   const isSignedIn = googleAuth.isSignedIn.get();
-  
+
   gapi.client.calendar.events.list({
     'calendarId': 'primary',
     'timeMin': (new Date()).toISOString(),
@@ -112,13 +111,13 @@ function initMyUserData() {
       'last_updated': '2 hours ago',
       'location': 0,
       'state': 0,
-      'time_zone': "",
+      'timezone': JSON.stringify(response.result.timeZone),
       'calendar': parseCalData(response.result.items),
       'isSignedIn': googleAuth.isSignedIn.get(),
     };
 
     myUserData = _myUserData;
-    _myUserData = JSON.stringify(_myUserData)
+    _myUserData = JSON.stringify(_myUserData);
     localStorage.setItem('myUserData', _myUserData);
     updateAllUserData(_myUserData, /*isNewEntry=*/true);
     
@@ -302,14 +301,15 @@ function renderView() {
     var events = userData.calendar;
     var schedule = [];
     var emojis = JSON.parse(JSON.stringify(EMOJIS));
+    var event = userData.user + ' has nothing coming up.';
 
-    for (i = 0; i < events.length; i++) {
-      var event = events[i];
+    if (events.length) {
+      var event = events[0];
       var when = event.start.dateTime;
       if (!when) {
         when = event.start.date;
       }
-      schedule.push({'event': event.title + ' (' + when + ')'});
+      event = `${userData.user} has ${event.title} @ ${when}`;
     }
 
     emojis.forEach(emoji => {
@@ -323,7 +323,9 @@ function renderView() {
       'schedule': schedule,
       'lake': userRules.atLake ? 'user_present.png' : 'bunny.png',
       'user': userRules.isUser,
-      'emojis': emojis
+      'emojis': emojis,
+      'event': event,
+      'timezone': 'timezone is ' + userData.timezone
     });
   });
 
