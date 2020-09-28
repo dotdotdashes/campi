@@ -24,36 +24,42 @@
     <pre id="availability" style="white-space: pre-wrap;"></pre>
 
     <script id="template" type="x-tmpl-mustache">
-      {{#campers}}
-        <div class="camp">
-          <div class="item tent">
-            <img src="assets/{{tent}}" />
-          </div>
-          <div class="item camper">
-            <img src="assets/{{camper}}" />
-          </div>
-          <div class="item fire">
-            <img src="assets/{{fire}}" />
-          </div>
-          <div class="item schedule">
-            {{#schedule}}
-              <div class="item event">{{event}}</div>
-            {{/schedule}}
-          </div>
-        </div>
-      {{/campers}}  
-    </script>
-
-    <main>
       <section id="sky-bg"></section>
+
       <section id="lake-bg">
         <div id="lake" onclick="goToLake()"></div>
+        {{#campers}}
+          <img src="assets/{{lake}}" />
+        {{/campers}}  
       </section>
-    
+
       <section id="campers-bg">
-        <div id="campers"></div>
+        <div id="campers">
+          {{#campers}}
+            <div class="camp">
+              <div class="item tent">
+                <img src="assets/{{tent}}" />
+              </div>
+              <div class="item camper">
+                <img src="assets/{{camper}}" />
+              </div>
+              <div class="item fire">
+                <img src="assets/{{fire}}" />
+              </div>
+              <div class="item schedule">
+                {{#schedule}}
+                  <div class="item event">{{event}}</div>
+                {{/schedule}}
+              </div>
+            </div>
+          {{/campers}}  
+        </div>
       </section>
-    </main>
+
+      
+    </script>
+
+    <main id="main"></main>
 
     <!--Use socket.io for real time, bidirectional and event-based communication-->
     <!--Documentation: https://socket.io/docs/-->

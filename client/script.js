@@ -13,7 +13,7 @@ var signoutButton = document.getElementById('signout_button');
 var readyToCallButton = document.getElementById('readyToCall_button');
 
 // Stores the state of the user, After making changes to myUserData, call updateMyUserData() to save to localStorage and propogate the changes to the other clients
-var myUserData;
+var myUserData = {};
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -79,7 +79,7 @@ function initMyUserData() {
     'maxResults': 10,
     'orderBy': 'startTime'
   }).then(function(response) {
-    var _myUserData = JSON.stringify({
+    var _myUserData = {
       'id': profile.getId(),
       'user': profile.getName(),
       'status': {
@@ -106,14 +106,15 @@ function initMyUserData() {
       'time_zone': "",
       'calendar': parseCalData(response.result.items),
       'isSignedIn': googleAuth.isSignedIn.get(),
-    });
+    };
 
     myUserData = _myUserData;
+    _myUserData = JSON.stringify(_myUserData)
     localStorage.setItem('myUserData', _myUserData);
     updateAllUserData(_myUserData, /*isNewEntry=*/true);
     
     // broadcast to other users that a new user joined
-    socket.emit('newUserJoined', myUserData);
+    socket.emit('newUserJoined', _myUserData);
   });
 }
 
@@ -179,10 +180,11 @@ function updateNewUserData(existingUserData) {
  * @param {string} myUpdatedUserData to update with.
  */
 function updateMyUserData() {
-  localStorage.setItem(myUserData);
-  updateAllUserData(myUserData, /*isNewEntry=*/false);
+  var data = JSON.stringify(myUserData);
+  localStorage.setItem('myUserData', data);
+  updateAllUserData(data, /*isNewEntry=*/false);
 
-  socket.emit('updateAllUsers', myUserData);
+  socket.emit('updateAllUsers', data);
 }
 
 /**
@@ -257,7 +259,7 @@ function calcRules(userData) {
   return {
     fireOn:     userData.active,
     tentOpen:   userData.status && isBusy,
-    isPresent:  userData.active && (userData.location == 0 || !isBusy),
+    isPresent:  userData.active && userData.location == 0 && !isBusy,
     atLake:     userData.active && userData.location == 1,
   }
 }
@@ -272,7 +274,6 @@ function renderView() {
 
   if (allUserData == []) return;
   allUserData.forEach(userData => {
-    console.log(userData);
     var userRules = calcRules(userData);
     var events = userData.calendar;
     var schedule = [];
@@ -287,18 +288,20 @@ function renderView() {
     }
 
     campers.push({
-      'camper': userData.user ? 'user_present.png' : 'user_absent.png',
+      'camper': userRules.isPresent ? 'user_present.png' : 'user_absent.png',
       'fire': userRules.fireOn ? 'fire_on.png' : 'fire_off.png',
       'tent': userRules.tentOpen ? 'tent_open.png' : 'tent_closed.png',
       'schedule': schedule,
+      'lake': userRules.atLake ? 'user_present.png' : 'user_absent.png'
     });
   });
   
   var data = {
     'campers': campers,
   }
-  var rendered = Mustache.render(template,data);
-  document.getElementById('campers').innerHTML = rendered;
+
+  var rendered = Mustache.render(template, data);
+  document.getElementById('main').innerHTML = rendered;
 }
 
 /**
