@@ -20,7 +20,6 @@ var myUserData = {};
  */
 function handleClientLoad() {
   gapi.load('client:auth2', initClient);
-  renderView();
 }
 
 /**
@@ -70,7 +69,7 @@ function initMyUserData() {
   const googleUser = googleAuth.currentUser.get();
   const profile = googleUser.getBasicProfile();
   const isSignedIn = googleAuth.isSignedIn.get();
-  
+
   gapi.client.calendar.events.list({
     'calendarId': 'primary',
     'timeMin': (new Date()).toISOString(),
@@ -85,7 +84,7 @@ function initMyUserData() {
       'status': {
         'text': "Eating lunch",
         'due': (new Date()).toISOString(),
-		    'emoji': '\01F354',
+        'emoji': '\01F354',
       },
       'message': {
         'text': 'Today I am doing nothing',
@@ -103,13 +102,13 @@ function initMyUserData() {
       'last_updated': '2 hours ago',
       'location': 0,
       'state': 0,
-      'time_zone': "",
+      'timezone': JSON.stringify(response.result.timeZone),
       'calendar': parseCalData(response.result.items),
       'isSignedIn': googleAuth.isSignedIn.get(),
     };
 
     myUserData = _myUserData;
-    _myUserData = JSON.stringify(_myUserData)
+    _myUserData = JSON.stringify(_myUserData);
     localStorage.setItem('myUserData', _myUserData);
     updateAllUserData(_myUserData, /*isNewEntry=*/true);
     
@@ -276,22 +275,23 @@ function renderView() {
   allUserData.forEach(userData => {
     var userRules = calcRules(userData);
     var events = userData.calendar;
-    var schedule = [];
+    var event = userData.user + ' nothing coming up.';
 
-    for (i = 0; i < events.length; i++) {
-      var event = events[i];
+    if (events) {
+      var event = events[0];
       var when = event.start.dateTime;
       if (!when) {
         when = event.start.date;
       }
-      schedule.push({'event': event.title + ' (' + when + ')'});
+      event = userData.user + ' has ' + event.title + ' @ ' + when;
     }
 
     campers.push({
       'camper': userRules.isPresent ? 'user_present.png' : 'user_absent.png',
       'fire': userRules.fireOn ? 'fire_on.png' : 'fire_off.png',
       'tent': userRules.tentOpen ? 'tent_open.png' : 'tent_closed.png',
-      'schedule': schedule,
+      'event': event,
+      'timezone': 'timezone is ' + userData.timezone,
       'lake': userRules.atLake ? 'user_present.png' : 'user_absent.png'
     });
   });
