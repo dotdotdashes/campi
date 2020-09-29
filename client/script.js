@@ -115,13 +115,20 @@ function initMyUserData() {
       'active': true,
       'location': 0,
       'state': 0,
-      'timezone': JSON.stringify(response.result.timeZone),
+      'timezone': response.result.timeZone,
       'calendar': parseCalData(response.result.items),
       'isSignedIn': googleAuth.isSignedIn.get(),
     };
 
-    myUserData = _myUserData;
-    _myUserData = JSON.stringify(_myUserData);
+    if (localStorage.getItem('myUserData') === null) {
+      myUserData = _myUserData
+      _myUserData = JSON.stringify(myUserData);
+    } 
+    else {
+      _myUserData = localStorage.getItem('myUserData');
+      myUserData = JSON.parse(_myUserData);
+    }
+
     localStorage.setItem('myUserData', _myUserData);
     updateAllUserData(_myUserData, /*isNewEntry=*/true);
     
@@ -304,7 +311,7 @@ function renderView() {
     var events = userData.calendar;
     var schedule = [];
     var emojis = JSON.parse(JSON.stringify(EMOJIS));
-    var event = `<b>${userData.user}</b> has nothing coming up.`;
+    var event = `<b>${userData.user}</b> has nothing coming up, `;
 
     if (events.length) {
       var event = events[0];
@@ -324,7 +331,7 @@ function renderView() {
     var dir = "cat";
     if (userData.user in USERS) dir = USERS[userData.user];
 
-    var timeZone = moment().tz(userData.timeZone).format('z');
+    var timezone = moment().tz(userData.timezone.replace(/['"]+/g, '')).format('z');
 
     campers.push({
       'camper': userRules.isPresent ? `${dir}/user_present.png` : 'user_absent.png',
@@ -336,7 +343,7 @@ function renderView() {
       'user': userRules.isUser,
       'emojis': emojis,
       'event': event,
-      'timezone': 'in timezone ' +  timeZone
+      'timezone': `in ${timezone}.`
     });
   });
 

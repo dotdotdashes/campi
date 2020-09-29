@@ -86,10 +86,9 @@ main section, main, .camp, .container, .item {
 .item .schedule {
     max-width: 220px;
     position: relative;
-    overflow-y: scroll;
+    overflow-y: hidden;
     margin-top: -125px;
     margin-left: -140px;
-    height: 120px;
 }
 
 /* .camp .item {
@@ -142,12 +141,12 @@ main section, main, .camp, .container, .item {
     color: #4F4535;
     transition: 0.2s;
     position: relative;
-    bottom: 10px;
+    bottom: 12px;
     right: 12px;
     z-index: 2;
-    font-size: 35px;
+    font-size: 30px;
     transform: rotate(-3deg);
-    width: 35px;
+    width: 39px;
     outline: none;
     background-color: transparent;
     border: none;
