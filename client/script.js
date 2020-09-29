@@ -17,6 +17,11 @@ var myUserData = {};
 
 const EMOJIS = [
   {
+    id: -1,
+    emoji: '⬜',
+    status: ""
+  },
+  {
     id: 0,
     emoji: '🎒',
     status: "doing school"
@@ -31,6 +36,12 @@ const EMOJIS = [
     emoji: '💤',
     status: "taking a break"
   },
+];
+
+const USERS = [
+  "Derrek Chow",
+  "Gracie Xia",
+  "Jasmine Ou"
 ];
 
 /**
@@ -99,16 +110,9 @@ function initMyUserData() {
     var _myUserData = {
       'id': profile.getId(),
       'user': profile.getName(),
-      'status': 1,
-      'requested': [
-        {
-          'user': 'Gracie',
-          'request': 0,
-          'text': "Let's talk today about the design.",
-        },
-      ],
+      'status': null,
+      'requested': null,
       'active': true,
-      'last_updated': '2 hours ago',
       'location': 0,
       'state': 0,
       'timezone': JSON.stringify(response.result.timeZone),
