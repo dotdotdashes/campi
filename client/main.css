@@ -147,4 +147,5 @@ main section, main, .camp, .container, .item {
     -moz-appearance: none;
     appearance: none;
     -ms-appearance: none;
+    filter: sepia(50%);
 }

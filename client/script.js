@@ -164,8 +164,8 @@ function makeUserInactive(userId) {
   var allUserData = JSON.parse(localStorage.getItem('allUserData')) || [];
 
   // Find the existing user to update.
+  console.log(allUserData);
   var index = allUserData.findIndex(x => x.id == userId);
-
   // Check if the user data already exists in the array.
   if (index === -1) return;
 

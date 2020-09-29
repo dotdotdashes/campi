@@ -21,7 +21,7 @@ io.on('connect', socket => {
       var userData = JSON.parse(data);
 
       // record how many windows a single users has open
-      var id = userData.user;
+      var id = userData.id;
       if (users.has(id)) {
         users.set(id, users.get(id)+1);
       }
@@ -29,7 +29,7 @@ io.on('connect', socket => {
         users.set(id, 1);
       }
 
-      console.log(`${id} joined`);
+      console.log(`${userData.user} joined`);
       // Notify all other users that a new user joined.
       socket.broadcast.emit('newUserJoined', data);
 
@@ -39,7 +39,7 @@ io.on('connect', socket => {
       }); 
 
       socket.on('disconnect', () => {
-        console.log(`${id} left`);
+        console.log(`${userData.user} left`);
         var userCount = users.get(id);
         // remove user only if they have closed the last window they had open
         if (userCount > 1) {
