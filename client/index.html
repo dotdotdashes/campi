@@ -41,7 +41,7 @@
                 <img class="tent" src="assets/{{tent}}" />
               </div>
               <div class="item">
-                <img class="camper" src="assets/{{camper}}" {{#user}}onclick="goToCamp()"{{/user}} />
+                <img class="camper {{#atLake}}absent{{/atLake}}" src="assets/{{camper}}" {{#user}}onclick="goToCamp()"{{/user}} />
               </div>
               <div class="item">
                 <img class="fire" src="assets/{{fire}}" />
@@ -68,8 +68,10 @@
     <!--Use mustache.js for templating: https://github.com/janl/mustache.js/-->
     <script src="https://unpkg.com/mustache@latest"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js" integrity="sha512-Izh34nqeeR7/nwthfeE0SI3c8uhFSnqxV0sI9TvTcXiFJkMd6fB644O64BRq2P/LA/+7eRvCw4GmLsXksyTHBg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.31/moment-timezone-with-data-10-year-range.js" integrity="sha512-fv+Ujl3Bw7MVRNHQwMwNe2+MAOGDGEIAeFK/yapP2ieJCVrxnFWUtglgNavPuQ9GrT4kotETO9UfQZRJTu15rQ==" crossorigin="anonymous"></script>
+
     <script src="socket.js"> </script>
-    <script src="dateFormat.js"></script>
     <script src="script.js" ></script>
 
     <!--Google Calendar API-->

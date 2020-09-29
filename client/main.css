@@ -28,6 +28,7 @@ main section, main, .camp, .container, .item {
     justify-content: center;
     display: flex;
     position: relative;
+    background: url("assets/foliage.png") top/cover;
 }
 
 #lake-bg .campers {
@@ -40,7 +41,7 @@ main section, main, .camp, .container, .item {
     width: 50px;
 }
 
-#lake:hover {
+#lake:hover, .camper.absent:hover {
     opacity: 0.5;
     cursor: pointer;
 }
@@ -75,8 +76,8 @@ main section, main, .camp, .container, .item {
                             "X X"
 }
 
-.item img{
-    
+.item img {
+    overflow: hidden;
     position: relative;
     width: 100%;
     object-fit: contain;
@@ -103,9 +104,11 @@ main section, main, .camp, .container, .item {
 }
 
 .camper {
+    transition: 0.2s;
     max-width: 80px;
     z-index: 2;
 }
+
 
 .fire {
     z-index: 3;

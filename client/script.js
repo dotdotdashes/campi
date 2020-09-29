@@ -38,11 +38,11 @@ const EMOJIS = [
   },
 ];
 
-const USERS = [
-  "Derrek Chow",
-  "Gracie Xia",
-  "Jasmine Ou"
-];
+const USERS = {
+  "Derrek Chow": "derrek",
+  "Gracie Xia": "gracie",
+  "Jasmine Ou": "jasmine"
+};
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -312,24 +312,31 @@ function renderView() {
       if (!when) {
         when = event.start.date;
       }
-      var date = new Date(when);
-      event = `<b>${userData.user}</b> has <b>${event.title}</b> <br> @ ${date.toLocaleString()}`;
+      
+      var date = moment(when).format('h:mma, ddd MMM Do');
+      event = `<b>${userData.user}</b> has <b>${event.title}</b> <br> @ ${date}`;
     }
 
     emojis.forEach(emoji => {
       emoji.selected = (emoji.id == userData.status)
     });
 
+    var dir = "cat";
+    if (userData.user in USERS) dir = USERS[userData.user];
+
+    var timeZone = moment().tz(userData.timeZone).format('z');
+
     campers.push({
-      'camper': userRules.isPresent ? 'user_present.png' : 'bunny.png',
+      'camper': userRules.isPresent ? `${dir}/user_present.png` : 'user_absent.png',
       'fire': userRules.fireOn ? 'fire_on.png' : 'fire_off.png',
-      'tent': userRules.tentOpen ? 'tent_open.png' : 'tent_closed.png',
+      'tent': userRules.tentOpen ? `${dir}/tent_open.png` : `${dir}/tent_closed.png`,
       'schedule': schedule,
-      'lake': userRules.atLake ? 'user_present.png' : 'bunny.png',
+      'lake': userRules.atLake ? `${dir}/user_present.png` : `${dir}/fern.png`,
+      'atLake': userRules.atLake,
       'user': userRules.isUser,
       'emojis': emojis,
       'event': event,
-      'timezone': 'in timezone ' + userData.timezone
+      'timezone': 'in timezone ' +  timeZone
     });
   });
 
