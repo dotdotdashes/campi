@@ -312,7 +312,8 @@ function renderView() {
       if (!when) {
         when = event.start.date;
       }
-      event = `<b>${userData.user}</b> has <b>${event.title}</b> @ ${when}`;
+      var date = new Date(when);
+      event = `<b>${userData.user}</b> has <b>${event.title}</b> <br> @ ${date.toLocaleString()}`;
     }
 
     emojis.forEach(emoji => {
@@ -328,7 +329,7 @@ function renderView() {
       'user': userRules.isUser,
       'emojis': emojis,
       'event': event,
-      'timezone': 'timezone is ' + userData.timezone
+      'timezone': 'in timezone ' + userData.timezone
     });
   });
 
