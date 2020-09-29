@@ -120,15 +120,8 @@ function initMyUserData() {
       'isSignedIn': googleAuth.isSignedIn.get(),
     };
 
-    if (localStorage.getItem('myUserData') === null) {
-      myUserData = _myUserData
-      _myUserData = JSON.stringify(myUserData);
-    } 
-    else {
-      _myUserData = localStorage.getItem('myUserData');
-      myUserData = JSON.parse(_myUserData);
-    }
-
+    myUserData = _myUserData;
+    _myUserData = JSON.stringify(myUserData);
     localStorage.setItem('myUserData', _myUserData);
     updateAllUserData(_myUserData, /*isNewEntry=*/true);
     
