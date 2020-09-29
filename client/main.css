@@ -4,6 +4,8 @@ html, body {
     margin: 0;
     padding: 0;
     background-color: #FDF0BD;
+    font-family: 'EB Garamond', serif;
+    color: #4F4535;
 }
 
 main {
@@ -124,11 +126,12 @@ main section, main, .camp, .container, .item {
 }
 
 .emoji-select:not([disabled]):hover {
-    text-shadow: 0 0 4px black;
+    text-shadow: 0 0 4px #4F4535;
     cursor: pointer;
 }
 
 .emoji-select {
+    color: #4F4535;
     transition: 0.2s;
     position: relative;
     bottom: 10px;

@@ -18,7 +18,7 @@ var myUserData = {};
 const EMOJIS = [
   {
     id: -1,
-    emoji: '⬜',
+    emoji: '◯',
     status: ""
   },
   {
@@ -305,7 +305,7 @@ function renderView() {
     var events = userData.calendar;
     var schedule = [];
     var emojis = JSON.parse(JSON.stringify(EMOJIS));
-    var event = userData.user + ' has nothing coming up.';
+    var event = `<b>${userData.user}</b> has nothing coming up.`;
 
     if (events.length) {
       var event = events[0];
@@ -313,7 +313,7 @@ function renderView() {
       if (!when) {
         when = event.start.date;
       }
-      event = `${userData.user} has ${event.title} @ ${when}`;
+      event = `<b>${userData.user}</b> has <b>${event.title}</b> @ ${when}`;
     }
 
     emojis.forEach(emoji => {
