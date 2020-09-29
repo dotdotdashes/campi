@@ -283,7 +283,7 @@ function calcRules(userData) {
   const isBusy = hasEvent(userData);
   return {
     fireOn:     userData.active,
-    tentOpen:   !(userData.status && isBusy),
+    tentOpen:   userData.status == null && !isBusy,
     isPresent:  userData.active && userData.location == 0 && !isBusy,
     atLake:     userData.active && userData.location == 1,
     isUser:     userData.user == myUserData.user
@@ -327,7 +327,7 @@ function renderView() {
     var timezone = moment().tz(userData.timezone.replace(/['"]+/g, '')).format('z');
 
     campers.push({
-      'camper': userRules.isPresent ? `${dir}/user_present.png` : 'user_absent.png',
+      'camper': userRules.isPresent ? `${dir}/user_present.png` : `${dir}fern.png`,
       'fire': userRules.fireOn ? 'fire_on.png' : 'fire_off.png',
       'tent': userRules.tentOpen ? `${dir}/tent_open.png` : `${dir}/tent_closed.png`,
       'schedule': schedule,

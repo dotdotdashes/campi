@@ -8,13 +8,6 @@
     <link rel="stylesheet" href="main.css">
   </head>
   <body onload="renderView()">
-    <!--Add buttons to initiate auth sequence and sign out-->
-    <button id="authorize_button" style="display: none;">Authorize</button>
-    <button id="signout_button" style="display: none;">Sign Out</button>
-
-    <!--Add label to display server connection status-->
-    <ul id="server-connection"></ul>
-
     <script id="template" type="x-tmpl-mustache">
       <section id="sky-bg"></section>
 
@@ -56,11 +49,13 @@
           {{/campers}}  
         </div>
       </section>
-
       
     </script>
 
     <main id="main"></main>
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorize_button" style="display: none;">Authorize</button>
+    <button id="signout_button" style="display: none;">Sign Out</button>
 
     <!--Use socket.io for real time, bidirectional and event-based communication-->
     <!--Documentation: https://socket.io/docs/-->
